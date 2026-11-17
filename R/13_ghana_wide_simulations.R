@@ -12,6 +12,7 @@ if (!isTRUE(st_crs(candidate_points) == st_crs(2136))) {
   stop("Ghana candidate grid must use EPSG:2136.")
 }
 required_fields <- c(
+  "x", "y",
   "cocoa_positive", "environmental_weight", "environmental_weight_40km",
   "mean_temp_c", "log_precip", "elevation_m",
   "nearest_major_road_distance_m", "nearest_town_distance_m"
@@ -159,6 +160,21 @@ observed_town_median <- median(
 )
 n_simulations <- 999L
 model_names <- c(names(weight_sets), "uniform_region")
+primary_model <- "spatial_block_20km_crossfit"
+# Each eligible 1 km cell contributes 1 km² of grid support to its quadrat.
+quadrat_width_m <- 25000
+grid_to_m <- 0.304799710181509
+quadrat_x <- floor(candidate_data$x * grid_to_m / quadrat_width_m)
+quadrat_y <- floor(candidate_data$y * grid_to_m / quadrat_width_m)
+quadrat_key <- paste(quadrat_x, quadrat_y)
+representatives <- which(!duplicated(quadrat_key))
+quadrat_id <- match(quadrat_key, quadrat_key[representatives])
+quadrat_n <- length(representatives)
+quadrat_area <- tabulate(quadrat_id, nbins = quadrat_n)
+quadrat_observed <- tabulate(
+  quadrat_id[candidate_data$cocoa_positive], nbins = quadrat_n
+)
+quadrat_draws <- matrix(0L, nrow = n_simulations, ncol = quadrat_n)
 distance_breaks <- c(-Inf, 5000, 10000, 20000, 50000, Inf)
 distance_labels <- c("0-5 km", "5-10 km", "10-20 km", "20-50 km", "50+ km")
 profile_data <- list(
@@ -223,6 +239,9 @@ for (simulation in seq_len(n_simulations)) {
     size = observed_n,
     replace = FALSE
   )
+  quadrat_draws[simulation, ] <- tabulate(
+    quadrat_id[selected_by_model[[primary_model]]], nbins = quadrat_n
+  )
 
   for (model_name in model_names) {
     selected <- selected_by_model[[model_name]]
@@ -247,6 +266,23 @@ for (simulation in seq_len(n_simulations)) {
       inclusion_counts[[model_name]][selected] + 1L
   }
 }
+stopifnot(all(rowSums(quadrat_draws) == observed_n))
+quadrat_quantiles <- apply(
+  sweep(quadrat_draws, 2, quadrat_area, "/"),
+  2, stats::quantile, probs = c(0.025, 0.5, 0.975)
+)
+write_csv(
+  data.frame(
+    x_m = (quadrat_x[representatives] + 0.5) * quadrat_width_m,
+    y_m = (quadrat_y[representatives] + 0.5) * quadrat_width_m,
+    eligible_grid_area_km2 = quadrat_area,
+    observed_intensity = quadrat_observed / quadrat_area,
+    simulated_lower = quadrat_quantiles[1, ],
+    simulated_median = quadrat_quantiles[2, ],
+    simulated_upper = quadrat_quantiles[3, ]
+  ),
+  file.path(tables_dir, "ghana_quadrat_intensity.csv")
+)
 if (any(!is.finite(road_draws)) ||
     any(!is.finite(town_draws)) ||
     any(vapply(inclusion_counts, sum, numeric(1)) !=

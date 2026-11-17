@@ -96,6 +96,48 @@ if (nrow(ghana) != 1L) {
   stop("Expected one Ghana national boundary for the coverage audit.")
 }
 ghana_union <- st_union(st_transform(st_make_valid(ghana), 2136))
+
+osm_path <- file.path(raw_dir, "ghana.gpkg")
+roads <- st_read(
+  osm_path,
+  query = paste(
+    "SELECT * FROM gis_osm_roads_free",
+    "WHERE fclass IN ('motorway', 'trunk', 'primary', 'secondary')"
+  ),
+  quiet = TRUE
+)
+roads <- st_collection_extract(
+  st_intersection(st_transform(roads, 2136), ghana_union),
+  "LINESTRING", warn = FALSE
+)
+places <- st_read(osm_path, layer = "gis_osm_places_free", quiet = TRUE)
+places <- places[places$fclass %in% c("city", "town", "national_capital"), ]
+places <- st_filter(st_transform(places, 2136), ghana_union, .predicate = st_within)
+cocoa_cells <- candidate_data[candidate_data$cocoa_positive, c("x", "y")]
+# Simplify lines for display at national scale. The distance analysis uses full geometry.
+display_boundary <- st_simplify(ghana_union, dTolerance = units::set_units(150, "m"))
+display_roads <- st_simplify(roads, dTolerance = units::set_units(100, "m"))
+
+save_opening_map <- function() {
+  grDevices::png(file.path(figures_dir, "ghana_cocoa_access_map.png"),
+                 width = 6.5, height = 7.5, units = "in", res = 250,
+                 type = if (capabilities("cairo")) "cairo" else getOption("bitmapType"))
+  on.exit(grDevices::dev.off(), add = TRUE)
+  graphics::par(mar = c(2.7, 0.3, 0.3, 0.3), xpd = NA)
+  plot(display_boundary, col = "#F5F3EC", border = "#555555", lwd = 0.6)
+  graphics::points(cocoa_cells$x, cocoa_cells$y, col = "#408653", pch = 15, cex = 0.16)
+  plot(st_geometry(display_roads), add = TRUE, col = "#A16D4D", lwd = 0.55)
+  plot(st_geometry(places), add = TRUE, col = "#252249", pch = 16, cex = 0.35)
+  bounds <- graphics::par("usr")
+  graphics::legend(
+    mean(bounds[1:2]), bounds[3], xjust = 0.5, yjust = 1,
+    legend = c("Mapped cocoa", "Major road", "Urban centre"),
+    col = c("#408653", "#A16D4D", "#252249"), pch = c(15, NA, 16),
+    lty = c(NA, 1, NA), horiz = TRUE, bty = "n"
+  )
+}
+save_opening_map()
+
 cocoa_raster <- terra::rast(file.path(raw_dir, "cocoa_map_th_065.tif"))
 cocoa_extent <- as.vector(terra::ext(cocoa_raster))
 cocoa_bbox <- st_as_sfc(st_bbox(
@@ -128,6 +170,54 @@ coverage_summary <- data.frame(
   boundary_source = "Geofabrik Ghana OSM national administrative polygon",
   stringsAsFactors = FALSE
 )
+
+quadrats <- read_csv(
+  file.path(tables_dir, "ghana_quadrat_intensity.csv"), show_col_types = FALSE
+)
+quadrat_surfaces <- rbind(
+  transform(quadrats, panel = "Observed intensity", intensity = observed_intensity),
+  transform(quadrats, panel = "Simulated median", intensity = simulated_median)
+)
+quadrat_surfaces$panel <- factor(
+  quadrat_surfaces$panel, levels = c("Observed intensity", "Simulated median")
+)
+quadrats$departure <- factor(
+  case_when(
+    quadrats$observed_intensity > quadrats$simulated_upper ~ "Above interval",
+    quadrats$observed_intensity < quadrats$simulated_lower ~ "Below interval",
+    TRUE ~ "Within interval"
+  ),
+  levels = c("Below interval", "Within interval", "Above interval")
+)
+ring_coordinates <- st_coordinates(st_cast(display_boundary, "MULTIPOLYGON"))
+boundary_m <- data.frame(
+  x_m = ring_coordinates[, "X"] * 0.304799710181509,
+  y_m = ring_coordinates[, "Y"] * 0.304799710181509,
+  ring = interaction(ring_coordinates[, "L1"], ring_coordinates[, "L2"])
+)
+quadrat_theme <- theme_void() + theme(
+  plot.title = element_text(face = "bold"), legend.position = "bottom"
+)
+quadrat_map <- ggplot(quadrat_surfaces, aes(x_m, y_m, fill = intensity)) +
+  geom_tile(width = 25000, height = 25000) +
+  geom_path(data = boundary_m, aes(x_m, y_m, group = ring),
+            inherit.aes = FALSE, linewidth = 0.25) +
+  facet_wrap(~panel) +
+  coord_equal() +
+  scale_fill_viridis_c(limits = c(0, 1), name = "Positive cells per eligible km²") +
+  quadrat_theme
+ggsave(file.path(figures_dir, "ghana_quadrat_intensity.png"), quadrat_map,
+       width = 8, height = 5, dpi = 250, bg = "white")
+quadrat_departure <- ggplot(quadrats, aes(x_m, y_m, fill = departure)) +
+  geom_tile(width = 25000, height = 25000) +
+  geom_path(data = boundary_m, aes(x_m, y_m, group = ring),
+            inherit.aes = FALSE, linewidth = 0.25) +
+  coord_equal() +
+  scale_fill_manual(values = c("#2166AC", "#EDEDED", "#B2182B"), drop = FALSE) +
+  labs(fill = NULL) +
+  quadrat_theme
+ggsave(file.path(figures_dir, "ghana_quadrat_intervals.png"), quadrat_departure,
+       width = 6, height = 5, dpi = 250, bg = "white")
 write_csv(
   coverage_summary,
   file.path(tables_dir, "ghana_source_coverage_summary.csv")
