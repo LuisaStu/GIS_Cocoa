@@ -7,6 +7,10 @@
 !/data/processed/.gitkeep
 /outputs/figures/*
 !/outputs/figures/.gitkeep
+!/outputs/figures/ghana_simulation_distance_distributions.png
+!/outputs/figures/ghana_distance_binned_intensity.png
+!/outputs/figures/ghana_environmental_intensity_comparison.png
+!/outputs/figures/ghana_environmental_intensity_residual.png
 /outputs/tables/*
 !/outputs/tables/.gitkeep
 
