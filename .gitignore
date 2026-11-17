@@ -1,0 +1,47 @@
+# Local project data and generated artifacts
+/data/raw/*
+!/data/raw/.gitkeep
+/data/interim/*
+!/data/interim/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+/outputs/figures/*
+!/outputs/figures/.gitkeep
+/outputs/tables/*
+!/outputs/tables/.gitkeep
+
+# R and project metadata
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.renv/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+
+# Large geospatial inputs
+*.tif
+*.tiff
+*.gpkg
+*.geojson
+*.shp
+*.zip
+*.pbf
+*.osm
+
+# Quarto build output
+/manuscript/_site/
+/manuscript/*.html
+/manuscript/*.pdf
+
+# Generated manuscript output
+/outputs/manuscript.html
+/outputs/manuscript.pdf
+/outputs/manuscript_files/
+/manuscript/.quarto/
+/manuscript/manuscript_files/
+!/data/raw/README

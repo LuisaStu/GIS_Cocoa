@@ -1,0 +1,19 @@
+project:
+  title: "Cocoa Farming and Access to Markets in Ghana"
+  output-dir: ../outputs
+
+format:
+  html:
+    toc: true
+    theme: cosmo
+    code-fold: true
+  pdf:
+    documentclass: article
+    include-in-header:
+      - text: |
+          \usepackage{float}
+
+execute:
+  echo: false
+  warning: false
+  message: false
