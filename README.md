@@ -4,24 +4,52 @@ This project asks whether mapped cocoa-growing areas in Ghana are closer to majo
 
 The directional hypothesis is that the median distance to the nearest major road is shorter for mapped cocoa cells than for simulated cells drawn according to the environmental baseline. The secondary comparison asks the same question for the nearest urban centre. The proximity statistic is computed separately for roads and urban centres, so it measures each relationship on its own.
 
+## Final project requirements
+
+The [PPOL 6805 / DSAN 6750 final project brief](https://jjacobs.me/ppol6805/final-project.html) is addressed in the [Quarto manuscript](manuscript/manuscript.qmd) and the sections below.
+
+| Course requirement | Project evidence |
+| --- | --- |
+| Application area | Agricultural geography and rural infrastructure in Ghana |
+| Spatial hypothesis and order | A directional first-order hypothesis about cocoa occupancy relative to roads, with settlement proximity as a secondary comparison |
+| Initial evidence | National overlay of mapped cocoa, major roads and urban centres |
+| Formal hypothesis evaluation | Four null baselines with 999 patterns each, a primary lower-tail road-distance test, and observed-versus-simulated first-order intensity by distance band and geographic quadrat |
+| Initial conclusion and roadmap | Provisional inference about mapped proximity and a sequence of data and model checks below |
+| Quarto Manuscript format | [Manuscript source](manuscript/manuscript.qmd) and [project configuration](manuscript/_quarto.yml) |
+
 ## Data and sources
 
 | Input | Role in the analysis | Source |
 | --- | --- | --- |
-| Thresholded cocoa map | Approximately 10 m satellite-derived cocoa extent for Ghana and C&ocirc;te d'Ivoire, based on imagery from around 2019-2021. The workflow uses the 0.65-threshold raster. | [ETH Zurich Research Collection](https://doi.org/10.3929/ethz-b-000654400), [Kalischek et al.](https://doi.org/10.1038/s43016-023-00751-8) |
-| Roads, settlements and boundary | The November 9, 2026 OpenStreetMap snapshot provides motorways and trunk, primary and secondary roads, plus mapped cities, towns and national capitals. The national administrative polygon defines the study area. | [Geofabrik Ghana](https://download.geofabrik.de/africa/ghana.html), [OpenStreetMap contributors and ODbL](https://www.openstreetmap.org/copyright) |
-| Climate and elevation | Annual mean temperature (BIO1), annual precipitation (BIO12) and SRTM-derived elevation at 2.5 arc-minutes, roughly 4.5 km in Ghana. Climate normals cover 1970-2000. | [WorldClim 2.1](https://www.worldclim.org/data/worldclim21.html) |
+| Thresholded cocoa map | `cocoa_map_th_065.tif`. Approximately 10 m satellite-derived cocoa extent for Ghana and Côte d'Ivoire, based on imagery from around 2019–2021. The workflow uses the 0.65-threshold raster. | CC BY 4.0, [ETH Zurich Research Collection](https://doi.org/10.3929/ethz-b-000654400), [Kalischek et al.](https://doi.org/10.1038/s43016-023-00751-8) |
+| Major roads | `ghana.gpkg`, layer `gis_osm_roads_free`. Retain motorway, trunk, primary and secondary line features in the working boundary. | November 9, 2026 OSM snapshot via [Geofabrik Ghana](https://download.geofabrik.de/africa/ghana.html), [OpenStreetMap contributors and ODbL](https://www.openstreetmap.org/copyright) |
+| Urban centres | `ghana.gpkg`, layer `gis_osm_places_free`. Retain city, town and national-capital points within the working boundary. | Same dated Geofabrik extract |
+| Study boundary | `ghana.gpkg`, layer `gis_osm_adminareas_a_free`. Use the national feature named Ghana as the working boundary. | Same dated Geofabrik extract |
+| Annual mean temperature (BIO1) | `wc2.1_2.5m_bio_1.tif`. The model converts stored tenths of a degree Celsius to degrees Celsius. | [WorldClim 2.1](https://www.worldclim.org/data/worldclim21.html), 1970–2000 normals |
+| Annual precipitation (BIO12) | `wc2.1_2.5m_bio_12.tif`. The model uses `log1p` of precipitation in millimetres. | [WorldClim 2.1](https://www.worldclim.org/data/worldclim21.html), 1970–2000 normals |
+| Elevation | `wc2.1_2.5m_elev.tif`. SRTM-derived elevation in metres. All three WorldClim layers have 2.5 arc-minute source resolution, roughly 4.5 km in Ghana. | [WorldClim 2.1](https://www.worldclim.org/data/worldclim21.html) |
 
 The national run used 6,229 major-road line features and 577 urban-centre points after filtering the Geofabrik extract. Multiple line features can belong to the same road. The [data manifest](data/manifest.csv) records input filenames, versions, licences and checksums.
 
 ## Methodology
 
+Under the primary null, the locations of a fixed number of cocoa-positive cells follow sampling weights estimated from temperature, precipitation and elevation. The directional alternative predicts a smaller median road distance than this baseline generates. The analysis concerns first-order intensity, the expected number of occupied cells per unit area. It evaluates accessibility gradients and geographic occupancy without requiring a pairwise correlation function.
+
 1. **Align the layers on a 1 km grid.** The workflow uses the Ghana National Grid (EPSG:2136) and converts projection units to metres for reporting. Eligible cells fall inside the working Ghana boundary and the cocoa raster coverage mask and have complete environmental predictors. Each cell with mapped cocoa contributes one observation at its centre. The threshold raster is reprojected using mean aggregation, and a cell is marked positive when the resulting value is greater than zero. WorldClim layers are aligned to the same grid by bilinear resampling. The workflow treats NaN within the raster coverage mask as no mapped cocoa, an assumption awaiting provider confirmation.
 2. **Measure proximity.** Compute the straight-line distance from each eligible cell centre to the nearest major road and the nearest qualifying urban centre. The primary statistic is median road distance across cocoa-positive cells. Median urban-centre distance is secondary.
 3. **Estimate an environmental baseline.** Fit a binomial generalized additive model with smooth terms for mean temperature, log-transformed annual precipitation and elevation. The primary model groups 20 km spatial blocks into five geographic folds using k-means on block coordinates and predicts each fold using a model fitted on the other four. The resulting scores weight how often cells are selected for simulations. Road and settlement distances are excluded from the model.
 4. **Simulate and compare.** Generate 999 patterns per baseline, drawing 57,131 distinct cells from the same 240,294 eligible locations on every draw. This holds the overall amount of mapped occupancy fixed so the comparison isolates where positive cells fall. Compare the primary baseline with a 40 km block design, an environmental model fitted to all eligible cells, and uniform sampling over eligible cells. The corrected lower-tail Monte Carlo p-value is (1 + simulated medians at or below the observed median) / 1000. Maps compare observed occupancy with simulated inclusion frequency. An exploratory distance profile compares observed and simulated shares across distance bands with pointwise 95% simulation intervals.
+5. **Compare geographic intensity.** Assign eligible cell centres to fixed 25 km quadrats aligned to the Ghana National Grid. Calculate observed and simulated intensity as the count of occupied cells divided by eligible grid area in square kilometres. Apply the same estimator to all 999 primary-baseline patterns and compare the observed map with simulated medians and pointwise 2.5th and 97.5th percentiles.
+
+The GAM uses additive smooths with basis dimension five and fast REML with term selection. Fold assignment uses seed `20261117`. For each weighted draw, the simulation takes the cells with the largest random keys based on the log weights and independent uniform variates. Simulations use seed `20261118`. The [analysis decisions](docs/decisions.md) record the primary comparison and sensitivity designs.
 
 ## Results and interpretation
+
+### Initial evidence
+
+![National overlay showing mapped cocoa-positive cells, major roads and urban centres](outputs/figures/ghana_cocoa_access_map.png)
+
+Mapped cocoa is concentrated in southern and southwestern Ghana and along a narrower eastern belt. The overlay shows where cocoa and infrastructure coincide and motivates comparing the overlap with patterns generated using the environmental baseline.
 
 ### How much closer is mapped cocoa?
 
@@ -71,6 +99,14 @@ The road profile shows more mapped cocoa than the baseline in every band within 
 
 **Figure 4. Cell-level differences from the primary environmental baseline.** Red marks cocoa-positive cells selected relatively infrequently in simulation. Blue marks cells without mapped cocoa that the simulation selected relatively often. For example, a cocoa-positive cell selected in 20% of draws has a residual of +0.80, while a cell with no mapped cocoa selected in 80% of draws has a residual of -0.80. These are descriptive differences. A prominent patch can guide follow-up on land cover, mapping quality or omitted predictors, but its colour alone gives no estimate of a road effect.
 
+### What does the 25 km intensity comparison show?
+
+![Observed and simulated cocoa occupancy per eligible square kilometre in 25 km quadrats](outputs/figures/ghana_quadrat_intensity.png)
+
+![Quadrats with observed occupancy below, within or above the primary simulation interval](outputs/figures/ghana_quadrat_intervals.png)
+
+Both surfaces show high intensity in southern Ghana and along the eastern cocoa belt. Of 440 quadrats with eligible cells, 97 observed intensities were above their pointwise intervals, 112 were below, and 231 were within them. Twenty-nine quadrats had fewer than 100 eligible square kilometres, so their estimates describe a small part of the quadrat. The departure counts describe local model mismatch. The intervals cover each quadrat separately.
+
 ### How much confidence should we place in the environmental comparison?
 
 | Spatial block size | Pooled held-out AUC | Mean AUC across evaluable folds | Fold AUC range | Folds with no cocoa-positive cells |
@@ -85,9 +121,17 @@ AUC measures how well the model ranks cocoa-positive cells above other cells. Th
 - **Access and causality.** Straight-line distances omit road connectivity, road condition and travel time. Mapped towns and cities approximate access to population centres. Estimating access to cocoa buyers would require verified purchasing sites. Historical settlement patterns, land use, and infrastructure placement could all contribute to the observed association. The analysis supports a provisional finding about where mapped cocoa occurs relative to roads and settlements. It leaves the causal effect of roads and residual clustering among cocoa locations open.
 
 
+## Conclusion and next steps
+
+Mapped cocoa cells were closer to major roads than the primary climate-and-elevation baseline predicted. The secondary urban-centre comparison showed a similar shift in the median, with the largest positive differences in occupancy at intermediate distances. These findings support a provisional first-order association under the fitted baselines. The quadrat results and uneven held-out performance identify places where the environmental baseline warrants further checking.
+
+1. Confirm with the cocoa map provider how to distinguish mapped absence from unknown coverage. Compare the working OSM boundary with an independently validated national boundary and use land-cover data to define eligible land.
+2. Refit the models with spatial folds that better represent the cocoa belt, assess held-out calibration, and rerun the simulations using plausible alternative environmental fits and eligibility masks.
+3. Gather verified cocoa purchasing locations and road data closer in time to the cocoa imagery. Test whether the proximity finding persists when access is measured by network travel time.
+
 ## Reproduce the analysis
 
-Install R and Quarto. From the repository root, restore the R environment and acquire the raster inputs.
+Install Quarto with manuscript project support and R 4.6.2, the version in [renv.lock](renv.lock). From the repository root, restore the R environment and acquire the raster inputs.
 
 ```sh
 Rscript -e "renv::restore()"
@@ -95,7 +139,9 @@ Rscript R/02_acquire_data.R
 Rscript R/11_acquire_environmental_data.R
 ```
 
-Extract the [dated Geofabrik archive](https://download.geofabrik.de/africa/ghana-261109-free.gpkg.zip) into data/raw/ and verify the SHA-256 of ghana.gpkg against the manifest. Then run the national workflow.
+Use the November 9, 2026 Geofabrik snapshot. The original archive is preserved in the project workspace as `data/raw/ghana-latest-free.gpkg.zip`. Geofabrik's public Ghana download index no longer lists that daily archive. For a fresh checkout on another machine, copy the preserved ZIP or its `ghana.gpkg` member from the original workspace. Extract the GeoPackage into `data/raw/` if needed and compare its SHA-256 with the pinned value in the manifest. On Windows, run `Get-FileHash data/raw/ghana.gpkg -Algorithm SHA256` in PowerShell. Exact reproduction depends on using that verified snapshot. [Geofabrik Ghana download index](https://download.geofabrik.de/africa/ghana.html)
+
+The WorldClim acquisition script refreshes its rows in the manifest with the metadata it observes locally.
 
 ```sh
 Rscript R/12_ghana_wide_null_model.R
@@ -104,7 +150,7 @@ Rscript R/14_ghana_wide_reporting.R
 quarto render manuscript --to html
 ```
 
-Intermediate spatial data go to data/processed/. Figures, tables and the rendered manuscript go to outputs/. The four PNGs above are outputs of the national reporting script.
+Raw inputs are stored under `data/raw/` and generated spatial data under `data/processed/`. Use a fresh checkout for a from-scratch analysis because the model script reuses processed grids. Figures and tables go to `outputs/figures/` and `outputs/tables/`. The HTML manuscript renders to `outputs/index.html`. The figures are tracked in Git. Raw inputs, processed data, generated tables and rendered manuscripts are excluded from version control. Source citations are in [references.bib](references.bib).
 
 | Generated table | Contents |
 | --- | --- |
@@ -112,3 +158,8 @@ Intermediate spatial data go to data/processed/. Figures, tables and the rendere
 | ghana_distance_binned_intensity_summary.csv | Observed and simulated shares and the number of eligible cells in each distance band |
 | ghana_environmental_cv_summary.csv | Pooled and fold-level performance summaries for both block sizes |
 | ghana_simulation_qa.csv | Number of draws and unique simulation IDs, fixed sample size and checks for finite road and urban-centre statistics |
+| ghana_quadrat_intensity.csv | Eligible area, observed intensity and simulation percentiles for each 25 km quadrat |
+| ghana_intensity_comparison.csv | Observed occupancy and mean simulated inclusion for each candidate cell |
+| ghana_simulation_draws.csv and ghana_distance_binned_intensity_draws.csv | Pattern-level proximity and distance-band summaries |
+| cocoa_raster_metadata.csv and ghana_source_coverage_summary.csv | Source raster validation and national boundary overlap |
+| ghana_null_model_summary.csv, ghana_environmental_cv_diagnostics.csv and ghana_environmental_model_terms.csv | Model inputs, coverage, held-out diagnostics and smooth-term estimates |

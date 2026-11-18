@@ -41,11 +41,14 @@ Thumbs.db
 *.osm
 
 # Quarto build output
+/manuscript/.gitignore
 /manuscript/_site/
 /manuscript/*.html
 /manuscript/*.pdf
 
 # Generated manuscript output
+/outputs/index.html
+/outputs/site_libs/
 /outputs/manuscript.html
 /outputs/manuscript.pdf
 /outputs/manuscript_files/

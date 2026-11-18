@@ -1,6 +1,10 @@
 project:
+  type: manuscript
   title: "Cocoa Farming and Access to Markets in Ghana"
   output-dir: ../outputs
+
+manuscript:
+  article: manuscript.qmd
 
 format:
   html:

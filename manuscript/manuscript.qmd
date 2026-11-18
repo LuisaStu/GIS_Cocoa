@@ -26,6 +26,8 @@ Evidence from Ghana links transportation infrastructure to agricultural markets 
 
 This study adds a Ghana-wide comparison that holds the number of mapped cocoa-positive cells fixed and varies their locations under a climate-and-elevation baseline. It evaluates a directional road-distance hypothesis and then examines the broader first-order pattern with both a distance profile and an area-based intensity surface. Together these comparisons show whether the median difference is concentrated in particular distance ranges and where the environmental baseline reproduces or misses the geography of mapped cocoa.
 
+Our directional hypothesis is that cocoa-positive cells have a shorter median distance to a major road than patterns drawn under the environmental null. Under that null, the fixed number of occupied cells is distributed according to weights estimated from climate and elevation. Median distance to an urban centre is a secondary comparison. Both statistics examine first-order variation in occupancy across the study window.
+
 # Data and methods
 
 The ETH Zurich binary cocoa map [@kalischek2024cocoamap] was overlaid with WorldClim 2.1 annual mean temperature, annual precipitation and SRTM-derived elevation [@fick2017worldclim; @worldclim2021], plus roads and settlements from the Geofabrik Ghana OpenStreetMap snapshot [@geofabrik2026; @OSMcopyright]. The working boundary is the Geofabrik OSM national administrative polygon. It is provisional, not an independently validated official boundary.
