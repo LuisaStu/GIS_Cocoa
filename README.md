@@ -1,6 +1,6 @@
 # Cocoa Farming and Access to Markets in Ghana
 
-This Georgetown University spatial data science project asks whether mapped cocoa-growing areas in Ghana are closer to major roads and urban centres than expected given their climate and elevation. Road proximity is the primary measure of accessibility. Urban-centre proximity is a secondary proxy for potential market access. The study examines first-order spatial intensity, meaning how the expected occurrence of mapped cocoa varies across locations.
+This project asks whether mapped cocoa-growing areas in Ghana are closer to major roads and urban centres than expected given their climate and elevation. Road proximity is the primary measure of accessibility. Urban-centre proximity is a secondary proxy for potential market access. The study examines first-order spatial intensity, meaning how the expected occurrence of mapped cocoa varies across locations.
 
 The directional hypothesis is that the median distance to the nearest major road is shorter for mapped cocoa cells than for simulated cells drawn according to the environmental baseline. The secondary comparison asks the same question for the nearest urban centre. The proximity statistic is computed separately for roads and urban centres, so it measures each relationship on its own.
 
