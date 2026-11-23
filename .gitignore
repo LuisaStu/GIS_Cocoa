@@ -13,6 +13,9 @@
 !/outputs/figures/ghana_accessibility_terrain.png
 !/outputs/figures/ghana_quadrat_intensity.png
 !/outputs/figures/ghana_quadrat_intervals.png
+!/outputs/figures/ghana_quadrat_residual_3d.png
+!/outputs/figures/ghana_quadrat_intensity_3d.png
+!/outputs/figures/ghana_quadrat_intervals_3d.png
 !/outputs/figures/ghana_distance_binned_intensity.png
 !/outputs/figures/ghana_environmental_intensity_comparison.png
 !/outputs/figures/ghana_environmental_intensity_residual.png
