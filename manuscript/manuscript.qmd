@@ -103,13 +103,13 @@ An exploratory whole-profile check compares all five road-distance bands at once
 
 ![Observed mapped cocoa occupancy and mean cell inclusion under the 20 km and 40 km cross-fitted environmental nulls.](../outputs/figures/ghana_environmental_intensity_comparison.png){#fig-occupancy}
 
-![3D differences between observed occupancy and the simulated median under the primary 20 km environmental baseline. Each column represents one 25 km quadrat. Teal rises above zero where observed occupancy is higher. Brown extends below zero where observed occupancy is lower.](../outputs/figures/ghana_quadrat_residual_3d.png){#fig-residual}
+![Observed cell occupancy minus mean simulated inclusion under the primary 20 km environmental null.](../outputs/figures/ghana_environmental_intensity_residual.png){#fig-residual}
 
-The 1 km maps show observed presence alongside mean simulated selection. The 3D comparison in @fig-residual shows differences at the quadrat scale within the broadly reproduced southern and eastern concentrations. The [2D cell-level residual map](https://github.com/LuisaStu/GIS_Cocoa/blob/main/outputs/figures/ghana_environmental_intensity_residual.png) shows the finer-grained pattern.
+The 1 km maps show observed presence alongside mean simulated selection. Their cell-level residuals reveal differences within the broadly reproduced southern and eastern concentrations. The quadrat analysis below summarizes those differences across larger geographic units.
 
-![3D comparison of observed occupancy and simulated median occupancy across the same 25 km quadrats. Column height and colour both show the percentage of eligible 1 km cells occupied in each quadrat. Both panels use the same scale.](../outputs/figures/ghana_quadrat_intensity_3d.png){#fig-quadrats}
+![Observed and simulated median intensity on the same 25 km quadrats. The colour scale shows positive cells per eligible square kilometre under the primary 20 km cross-fitted environmental baseline.](../outputs/figures/ghana_quadrat_intensity.png){#fig-quadrats}
 
-![3D map of observed cocoa occupancy and pointwise 95% Monte Carlo intervals from 999 primary environmental simulations. Column height shows observed occupancy. Colour shows whether that occupancy falls below, within or above its quadrat's interval.](../outputs/figures/ghana_quadrat_intervals_3d.png){#fig-quadrat-intervals width=80%}
+![Quadrats where observed intensity falls below, within or above the pointwise 95% Monte Carlo interval from 999 primary environmental simulations. The thin line shows the working Ghana boundary.](../outputs/figures/ghana_quadrat_intervals.png){#fig-quadrat-intervals width=80%}
 
 The two surfaces in @fig-quadrats show high occupancy across much of southern Ghana and a narrower eastern concentration. @fig-quadrat-intervals shows where those broad similarities conceal local underprediction and overprediction. Across 440 quadrats with eligible cells, 97 observed intensities were above their pointwise intervals, 112 were below, and 231 fell within the intervals. This spread indicates substantial local mismatch despite the broad agreement. In 29 quadrats, fewer than 100 of the possible 625 square kilometres were eligible, so those estimates reflect relatively small areas. The number of departures is descriptive because the intervals cover one location at a time. Spatial departures could reflect missing environmental or land-use variables, classification error, or limitations of the fitted environmental model.
 
