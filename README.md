@@ -8,7 +8,7 @@ The directional hypothesis is that the median distance to the nearest major road
 
 The [PPOL 6805 / DSAN 6750 final project brief](https://jjacobs.me/ppol6805/final-project.html) is addressed in the [Quarto manuscript](manuscript/manuscript.qmd) and the sections below.
 
-Download and open the [rendered HTML manuscript](outputs/index.html) in a browser. The [simulation results](outputs/tables/ghana_simulation_summary.csv), [simulation checks](outputs/tables/ghana_simulation_qa.csv), [distance-band results](outputs/tables/ghana_distance_binned_intensity_summary.csv), [quadrat results](outputs/tables/ghana_quadrat_intensity.csv), and [cross-validation summary](outputs/tables/ghana_environmental_cv_summary.csv) are available as CSVs.
+Read the [live Quarto manuscript](https://luisastu.github.io/GIS_Cocoa/) or download the [rendered HTML](outputs/index.html) for offline reading. The [simulation results](outputs/tables/ghana_simulation_summary.csv), [simulation checks](outputs/tables/ghana_simulation_qa.csv), [distance-band results](outputs/tables/ghana_distance_binned_intensity_summary.csv), [quadrat results](outputs/tables/ghana_quadrat_intensity.csv), and [cross-validation summary](outputs/tables/ghana_environmental_cv_summary.csv) are available as CSVs.
 
 Use the [showcase guide](docs/showcase.md) for the December 2 in-class poster session. The [whole-road-profile check](outputs/tables/ghana_road_profile_check.csv) compares the five road-distance bands jointly across the 999 primary draws.
 
