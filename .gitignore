@@ -16,6 +16,11 @@
 !/outputs/figures/ghana_environmental_intensity_residual.png
 /outputs/tables/*
 !/outputs/tables/.gitkeep
+!/outputs/tables/ghana_simulation_summary.csv
+!/outputs/tables/ghana_simulation_qa.csv
+!/outputs/tables/ghana_distance_binned_intensity_summary.csv
+!/outputs/tables/ghana_quadrat_intensity.csv
+!/outputs/tables/ghana_environmental_cv_summary.csv
 
 # R and project metadata
 .Rproj.user/
@@ -47,7 +52,6 @@ Thumbs.db
 /manuscript/*.pdf
 
 # Generated manuscript output
-/outputs/index.html
 /outputs/site_libs/
 /outputs/manuscript.html
 /outputs/manuscript.pdf

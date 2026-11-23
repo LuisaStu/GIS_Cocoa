@@ -1,0 +1,5 @@
+null_model,simulation_count,unique_simulation_ids,candidate_cell_count,fixed_observation_count,inclusion_probability_sum,finite_road_and_town_statistics
+spatial_block_20km_crossfit,999,999,240294,57131,57131,TRUE
+spatial_block_40km_crossfit,999,999,240294,57131,57131,TRUE
+in_sample_environmental,999,999,240294,57131,57131,TRUE
+uniform_region,999,999,240294,57131,57131,TRUE

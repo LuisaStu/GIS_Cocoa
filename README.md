@@ -8,6 +8,8 @@ The directional hypothesis is that the median distance to the nearest major road
 
 The [PPOL 6805 / DSAN 6750 final project brief](https://jjacobs.me/ppol6805/final-project.html) is addressed in the [Quarto manuscript](manuscript/manuscript.qmd) and the sections below.
 
+Download and open the [rendered HTML manuscript](outputs/index.html) in a browser. The [simulation results](outputs/tables/ghana_simulation_summary.csv), [simulation checks](outputs/tables/ghana_simulation_qa.csv), [distance-band results](outputs/tables/ghana_distance_binned_intensity_summary.csv), [quadrat results](outputs/tables/ghana_quadrat_intensity.csv), and [cross-validation summary](outputs/tables/ghana_environmental_cv_summary.csv) are available as CSVs.
+
 | Course requirement | Project evidence |
 | --- | --- |
 | Application area | Agricultural geography and rural infrastructure in Ghana |
@@ -150,7 +152,7 @@ Rscript R/14_ghana_wide_reporting.R
 quarto render manuscript --to html
 ```
 
-Raw inputs are stored under `data/raw/` and generated spatial data under `data/processed/`. Use a fresh checkout for a from-scratch analysis because the model script reuses processed grids. Figures and tables go to `outputs/figures/` and `outputs/tables/`. The HTML manuscript renders to `outputs/index.html`. The figures are tracked in Git. Raw inputs, processed data, generated tables and rendered manuscripts are excluded from version control. Source citations are in [references.bib](references.bib).
+Raw inputs are stored under `data/raw/` and generated spatial data under `data/processed/`. Use a fresh checkout for a from-scratch analysis because the model script reuses processed grids. Figures and tables go to `outputs/figures/` and `outputs/tables/`. Git tracks the figures, the five results tables linked above and the HTML manuscript at `outputs/index.html`. The other generated outputs and raw inputs stay local. Source citations are in [references.bib](references.bib).
 
 | Generated table | Contents |
 | --- | --- |
