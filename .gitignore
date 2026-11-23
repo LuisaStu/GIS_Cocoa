@@ -21,6 +21,7 @@
 !/outputs/tables/ghana_distance_binned_intensity_summary.csv
 !/outputs/tables/ghana_quadrat_intensity.csv
 !/outputs/tables/ghana_environmental_cv_summary.csv
+!/outputs/tables/ghana_road_profile_check.csv
 
 # R and project metadata
 .Rproj.user/

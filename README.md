@@ -10,6 +10,8 @@ The [PPOL 6805 / DSAN 6750 final project brief](https://jjacobs.me/ppol6805/fina
 
 Download and open the [rendered HTML manuscript](outputs/index.html) in a browser. The [simulation results](outputs/tables/ghana_simulation_summary.csv), [simulation checks](outputs/tables/ghana_simulation_qa.csv), [distance-band results](outputs/tables/ghana_distance_binned_intensity_summary.csv), [quadrat results](outputs/tables/ghana_quadrat_intensity.csv), and [cross-validation summary](outputs/tables/ghana_environmental_cv_summary.csv) are available as CSVs.
 
+Use the [showcase guide](docs/showcase.md) for the December 2 in-class poster session. The [whole-road-profile check](outputs/tables/ghana_road_profile_check.csv) compares the five road-distance bands jointly across the 999 primary draws.
+
 | Course requirement | Project evidence |
 | --- | --- |
 | Application area | Agricultural geography and rural infrastructure in Ghana |
@@ -149,10 +151,11 @@ The WorldClim acquisition script refreshes its rows in the manifest with the met
 Rscript R/12_ghana_wide_null_model.R
 Rscript R/13_ghana_wide_simulations.R
 Rscript R/14_ghana_wide_reporting.R
+Rscript --vanilla R/15_ghana_road_profile_check.R
 quarto render manuscript --to html
 ```
 
-Raw inputs are stored under `data/raw/` and generated spatial data under `data/processed/`. Use a fresh checkout for a from-scratch analysis because the model script reuses processed grids. Figures and tables go to `outputs/figures/` and `outputs/tables/`. Git tracks the figures, the five results tables linked above and the HTML manuscript at `outputs/index.html`. The other generated outputs and raw inputs stay local. Source citations are in [references.bib](references.bib).
+Raw inputs are stored under `data/raw/` and generated spatial data under `data/processed/`. Use a fresh checkout for a from-scratch analysis because the model script reuses processed grids. Figures and tables go to `outputs/figures/` and `outputs/tables/`. Git tracks the figures, the results tables linked above and the HTML manuscript at `outputs/index.html`. The other generated outputs and raw inputs stay local. Source citations are in [references.bib](references.bib).
 
 | Generated table | Contents |
 | --- | --- |
