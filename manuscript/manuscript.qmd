@@ -12,11 +12,7 @@ Cocoa is an important source of income for farming households in Ghana. Where fa
 
 Agricultural geography offers a competing explanation for apparent proximity to infrastructure. Cocoa occupies a geographically concentrated belt, and roads and settlements also vary across Ghana. A comparison with uniformly distributed locations would therefore combine the geography of temperature, rainfall and elevation with the geography of access. We ask whether mapped cocoa is systematically closer to major roads than expected under a baseline that allows cell occupancy to vary with those environmental conditions. We examine proximity to towns and cities as a secondary feature of the same landscape.
 
-![Mapped cocoa, major roads and urban centres in Ghana. Green squares represent cocoa-positive 1 km cells, brown lines show major roads, and purple points show cities, towns and national capitals. Cocoa data are from ETH Zurich. Road, settlement and boundary data are from OpenStreetMap contributors via Geofabrik.](../outputs/figures/ghana_cocoa_access_map.png){#fig-access width=80%}
-
-@fig-access shows that mapped cocoa is concentrated in southern and southwestern Ghana and in a narrower eastern belt. Roads and urban centres are visible within and beyond these concentrations. The overlap motivates the comparison below, in which the reference locations also concentrate where the fitted environmental model assigns higher weights.
-
-## Related research
+# Related research
 
 Ghana's system of cocoa marketing distinguishes physical access from the price received by producers. @kolavalli2017 describe a board-managed system that coordinates producer-price setting, quality control and export marketing. Even when a producer price is set centrally, farm-to-purchasing-point access can affect the time and transport needed to move beans. Urban centres may indicate broader access to population and services, but dedicated cocoa buying points may also be located in smaller communities. The nearest mapped town is therefore a secondary proxy for settlement proximity, and its relationship with farm-to-buyer travel is an empirical question.
 
@@ -44,7 +40,17 @@ First-order intensity describes how the expected number of occupied cells per un
 
 We also estimate a conventional area-based quadrat intensity surface over a fixed 25 km grid aligned to the Ghana National Grid. Each eligible 1 km cell contributes one square kilometre of grid support to the quadrat containing its centre. Intensity is the positive-cell count divided by this eligible grid area, including at the national edge. The same estimator is applied to each of the 999 primary environmental simulations. We map the observed estimate, the simulated median estimate, and where the observed estimate lies outside the 2.5th to 97.5th percentile interval for that quadrat. The 25 km scale summarizes broad geographic departures while retaining more spatial detail than the distance profiles. Both sets of intervals are pointwise. Their visual comparisons are exploratory, and the directional median-distance statistic remains the primary Monte Carlo test.
 
-# Results
+# Exploratory spatial analysis
+
+![Mapped cocoa, major roads and urban centres in Ghana. Green squares represent cocoa-positive 1 km cells, brown lines show major roads, and purple points show cities, towns and national capitals. Cocoa data are from ETH Zurich. Road, settlement and boundary data are from OpenStreetMap contributors via Geofabrik.](../outputs/figures/ghana_cocoa_access_map.png){#fig-access width=80%}
+
+@fig-access shows a broad concentration in southern and southwestern Ghana and a narrower belt in the east. Roads and urban centres are visible within and beyond these concentrations. The overlap motivates a comparison with patterns that give greater weight to suitable climate and elevation.
+
+![Ghana in two oblique terrain views. Green shows observed cocoa occupancy (left). Teal and brown show where occupancy is above and below simulated mean occupancy under the primary environmental baseline (right). Colour and SRTM-derived elevation are averaged over the same eligible 1 km cells within each 8 km display bin. Elevation is vertically exaggerated.](../outputs/figures/ghana_cocoa_terrain.png){#fig-terrain}
+
+@fig-terrain places the southern and eastern concentrations in their topographic context. Adjacent areas at similar elevations can have departures of opposite signs, particularly across the southern belt. The discrepancy panel describes the full temperature, precipitation and elevation baseline. The road-distance tests below evaluate the accessibility hypothesis directly.
+
+# Hypothesis tests and results
 
 ## Median proximity and distance-binned intensity
 
@@ -83,7 +89,9 @@ The 1 km maps show observed presence alongside mean simulated selection. Their c
 
 The two surfaces in @fig-quadrats show high occupancy across much of southern Ghana and a narrower eastern concentration. @fig-quadrat-intervals shows where those broad similarities conceal local underprediction and overprediction. Across 440 quadrats with eligible cells, 97 observed intensities were above their pointwise intervals, 112 were below, and 231 fell within the intervals. This spread indicates substantial local mismatch despite the broad agreement. In 29 quadrats, fewer than 100 of the possible 625 square kilometres were eligible, so those estimates reflect relatively small areas. The number of departures is descriptive because the intervals cover one location at a time. Spatial departures could reflect missing environmental or land-use variables, classification error, or limitations of the fitted environmental model.
 
-# Environmental model validity
+# Discussion
+
+## Environmental model validity
 
 The pooled out-of-fold AUCs are 0.934 (20 km) and 0.934 (40 km), while mean AUC across folds with both classes is 0.815 and 0.819, respectively. In both block-size designs, one held-out fold has no positive cells, so its AUC is undefined; the remaining fold AUC ranges are 0.463–0.976 and 0.458–0.987. Pooled scores combine predictions from different fold-specific fits and should not be read as a stable measure of national predictive performance. The strong between-fold variation and near-separation in some folds make the environmental scores an uncertain null model, despite finite simulated weights.
 
@@ -91,7 +99,7 @@ In the primary 20 km design, the weakest evaluable fold contains 37,453 of the 5
 
 The similar distance results under 20 km and 40 km blocks establish sensitivity to those two choices. Their fold diagnostics show that both designs face the same geographic imbalance. The simulation intervals condition on the resulting weights, so they can be narrow even when the weights themselves are uncertain. A useful follow-up would compare geographically coherent, buffered folds with more balanced positive counts, inspect calibration in the cocoa belt separately, and rerun the simulations across credible alternative environmental fits.
 
-# Limitations and next steps
+## Limitations
 
 - The project owner instructed that ETH raster NaN be interpreted as no cocoa only within the raster footprint. ETH metadata labels NaN as nodata and does not resolve its meaning; this remains an assumption that may misclassify unknown cells.
 - The source raster footprint is not identical to Ghana's boundary, and the area calculation relies on a provisional OSM polygon. Obtain an independently validated boundary and verify the source coverage before making definitive national claims.
@@ -101,7 +109,25 @@ The similar distance results under 20 km and 40 km blocks establish sensitivity 
 - Fold allocation is geographically imbalanced, including one held-out fold without positive cells at each block size. The GAM also produced warnings about fitted probabilities near zero or one. Re-design cross-validation and assess model-fitting uncertainty before relying on the environmental null.
 - Distances are Euclidean proximity, not network travel time. No causal inference or second-order clustering analysis is performed.
 
-The next step is to verify source-raster NaN semantics and the working boundary, then use a vetted land-cover mask to define eligible land. After that, reassess calibration with alternative spatial folds and test whether the proximity gaps persist under those revised weights. Verified purchasing sites and historical road-network data would support a subsequent comparison using network travel times. The current outputs support a provisional Ghana-wide first-order analysis, not a final validated market-access estimate.
+# Conclusion and roadmap
+
+Mapped cocoa cells were a median 1.30 km closer to major roads than predicted by the primary climate-and-elevation baseline. The direction persists across the three environmental baselines, and the national maps show that substantial local differences remain even where they reproduce the broad cocoa belt. The median distance and intensity comparisons support a provisional first-order association between mapped cocoa and road proximity.
+
+The next step is to verify source-raster NaN semantics and the working boundary, then use a vetted land-cover mask to define eligible land. After that, reassess calibration with alternative spatial folds and test whether the proximity gaps persist under those revised weights. Verified purchasing sites and historical road-network data would support a subsequent comparison using network travel times.
+
+# Code and reproducibility
+
+The [repository instructions](https://github.com/LuisaStu/GIS_Cocoa#reproduce-the-analysis) document input versions, checksums and the dated road extract. After acquiring the inputs and restoring the R environment, run these commands from the repository root. The terrain script uses NumPy, Matplotlib and Rasterio.
+
+```sh
+Rscript R/12_ghana_wide_null_model.R
+Rscript R/13_ghana_wide_simulations.R
+Rscript R/14_ghana_wide_reporting.R
+Rscript --vanilla R/15_ghana_road_profile_check.R
+python manuscript/terrain_maps.py
+```
+
+Inspect the [simulation code](https://github.com/LuisaStu/GIS_Cocoa/blob/main/R/13_ghana_wide_simulations.R) for the fixed-count draws and the [terrain code](https://github.com/LuisaStu/GIS_Cocoa/blob/main/manuscript/terrain_maps.py) for the display aggregation and perspective.
 
 # References
 

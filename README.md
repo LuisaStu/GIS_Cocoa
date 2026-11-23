@@ -155,6 +155,8 @@ Rscript --vanilla R/15_ghana_road_profile_check.R
 quarto render manuscript --to html
 ```
 
+To regenerate the paired 3D terrain views, install NumPy, Matplotlib and Rasterio in your Python environment and run `python manuscript/terrain_maps.py` after generating the analysis outputs and before rendering the manuscript.
+
 Raw inputs are stored under `data/raw/` and generated spatial data under `data/processed/`. Use a fresh checkout for a from-scratch analysis because the model script reuses processed grids. Figures and tables go to `outputs/figures/` and `outputs/tables/`. Git tracks the figures, the results tables linked above and the HTML manuscript at `outputs/index.html`. The other generated outputs and raw inputs stay local. Source citations are in [references.bib](references.bib).
 
 | Generated table | Contents |
