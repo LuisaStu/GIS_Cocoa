@@ -1,6 +1,8 @@
-"""Render paired Ghana terrain views from the completed analysis grid."""
+"""Render Ghana occupancy and accessibility terrain views from the completed analysis grid."""
 
+from contextlib import closing
 from pathlib import Path
+import sqlite3
 
 import matplotlib
 
@@ -8,24 +10,35 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize, TwoSlopeNorm
 import numpy as np
-import rasterio
 
 
 root = Path(__file__).resolve().parents[1]
 cells = np.genfromtxt(
     root / "outputs/tables/ghana_intensity_comparison.csv",
     delimiter=",",
-    skip_header=1,
-    usecols=(1, 2, 4, 5, 9, 10),
+    names=True,
+    usecols=(
+        "cell", "observed_presence", "spatial_block_20km_crossfit_simulated_inclusion",
+        "x_m", "y_m",
+    ),
 )
-x, y, observed, inclusion, x_m, y_m = cells.T
-with rasterio.open(root / "data/processed/ghana_1km_elevation_m.tif") as raster:
-    elevation = raster.read(1, masked=True).astype(float).filled(np.nan)
-    rows, columns = rasterio.transform.rowcol(raster.transform, x, y)
-    elevation = elevation[rows, columns]
+cells.sort(order="cell")
+observed = cells["observed_presence"]
+inclusion = cells["spatial_block_20km_crossfit_simulated_inclusion"]
+x_m, y_m = cells["x_m"], cells["y_m"]
+grid_path = root / "data/processed/ghana_1km_candidate_points.gpkg"
+with closing(sqlite3.connect(f"{grid_path.as_uri()}?mode=ro", uri=True)) as connection:
+    grid = np.asarray(connection.execute("""
+        SELECT cell, elevation_m, nearest_major_road_distance_m, nearest_town_distance_m
+        FROM ghana_1km_candidate_points
+        ORDER BY cell
+    """).fetchall())
 
-if not np.isfinite(elevation).all():
-    raise ValueError("Eligible cells must have finite elevation")
+cell_ids, elevation, road_distance, town_distance = grid.T
+if not np.array_equal(cell_ids, cells["cell"]) or np.unique(cell_ids).size != cells.size:
+    raise ValueError("The intensity outputs and candidate grid must have the same unique cell IDs")
+if not np.isfinite(grid).all():
+    raise ValueError("Eligible cells must have finite terrain and distance values")
 
 # Display bins use only eligible cells, just like the manuscript's intensity maps.
 width_m = 8000
@@ -45,40 +58,50 @@ def average(values):
 
 xx, yy = np.meshgrid((x_centres + 0.5) * width_m / 1000, (y_centres + 0.5) * width_m / 1000)
 terrain = average(elevation)
-fig = plt.figure(figsize=(12, 7.1), facecolor="white", layout="constrained")
-panels = (
-    ("Mapped cocoa occupancy", average(observed), "YlGn", Normalize(0, 100), "% of eligible cells"),
-    (
-        "Difference from environmental baseline",
-        average(observed - inclusion),
-        "BrBG",
-        TwoSlopeNorm(vmin=-60, vcenter=0, vmax=60),
-        "Observed minus mean simulated (percentage points)",
-    ),
-)
-for index, (title, values, palette, scale, label) in enumerate(panels, start=1):
-    axis = fig.add_subplot(1, 2, index, projection="3d", proj_type="ortho")
-    colors = plt.get_cmap(palette)
-    axis.plot_surface(
-        xx, yy, terrain, facecolors=colors(scale(100 * values)),
-        rstride=1, cstride=1, shade=False, linewidth=0, antialiased=False,
-    )
-    axis.set_title(title, fontsize=15, weight="bold", pad=3)
-    axis.set_xlabel("Easting (km)", labelpad=8)
-    axis.set_ylabel("Northing (km)", labelpad=9)
-    axis.set_zlabel("Elevation (m)", labelpad=5)
-    axis.set_xticks([150, 350, 550])
-    axis.set_yticks([0, 250, 500, 750])
-    axis.set_zlim(0, 800)
-    axis.set_zticks([0, 400, 800])
-    axis.set_box_aspect((np.ptp(xx), np.ptp(yy), 140))
-    axis.view_init(elev=41, azim=-112)
-    axis.tick_params(labelsize=8, pad=1)
-    axis.grid(False)
-    bar = fig.colorbar(plt.cm.ScalarMappable(norm=scale, cmap=colors), ax=axis,
-                       orientation="horizontal", shrink=0.82, pad=0.01,
-                       extend="both" if index == 2 else "neither")
-    bar.set_label(label)
+def render_pair(filename, panels):
+    fig = plt.figure(figsize=(12, 7.1), facecolor="white", layout="constrained")
+    for index, (title, values, palette, scale, label, extend) in enumerate(panels, start=1):
+        axis = fig.add_subplot(1, 2, index, projection="3d", proj_type="ortho")
+        colors = plt.get_cmap(palette)
+        axis.plot_surface(
+            xx, yy, terrain, facecolors=colors(scale(average(values))),
+            rstride=1, cstride=1, shade=False, linewidth=0, antialiased=False,
+        )
+        axis.set_title(title, fontsize=15, weight="bold", pad=3)
+        axis.set_xlabel("Easting (km)", labelpad=8)
+        axis.set_ylabel("Northing (km)", labelpad=9)
+        axis.set_zlabel("Elevation (m)", labelpad=5)
+        axis.set_xticks([150, 350, 550])
+        axis.set_yticks([0, 250, 500, 750])
+        axis.set_zlim(0, max(800, np.nanmax(terrain)))
+        axis.set_zticks([0, 400, 800])
+        axis.set_box_aspect((np.ptp(xx), np.ptp(yy), 140))
+        axis.view_init(elev=41, azim=-112)
+        axis.tick_params(labelsize=8, pad=1)
+        axis.grid(False)
+        bar = fig.colorbar(
+            plt.cm.ScalarMappable(norm=scale, cmap=colors), ax=axis,
+            orientation="horizontal", shrink=0.82, pad=0.01, extend=extend,
+        )
+        bar.set_label(label)
 
-fig.savefig(root / "outputs/figures/ghana_cocoa_terrain.png", dpi=180,
-            bbox_inches="tight", pad_inches=0.2)
+    fig.savefig(root / "outputs/figures" / filename, dpi=180,
+                bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+render_pair("ghana_cocoa_terrain.png", (
+    ("Mapped cocoa occupancy", 100 * observed, "YlGn",
+     Normalize(0, 100), "% of eligible cells", "neither"),
+    ("Difference from environmental baseline", 100 * (observed - inclusion), "BrBG",
+     TwoSlopeNorm(vmin=-60, vcenter=0, vmax=60),
+     "Observed minus mean simulated (percentage points)", "both"),
+))
+
+distance_scale = Normalize(0, 100)
+render_pair("ghana_accessibility_terrain.png", (
+    ("Distance to a major road", road_distance / 1000, "cividis",
+     distance_scale, "Mean straight-line distance (km)", "max"),
+    ("Distance to an urban centre", town_distance / 1000, "cividis",
+     distance_scale, "Mean straight-line distance (km)", "max"),
+))

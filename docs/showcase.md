@@ -24,3 +24,5 @@ The course lists an in-class poster session for Wednesday, December 2, 2026. The
 - **Why call this a market-access proxy?** The data measure straight-line proximity to mapped roads and settlements. Actual access depends on road quality, network travel time and the locations of cocoa buyers.
 
 Keep a local copy of the [rendered manuscript](../outputs/index.html) available during the session. Its figures are embedded and can be opened in the browser.
+
+Use the [3D accessibility maps](../outputs/figures/ghana_accessibility_terrain.png) if visitors ask what the distance measures capture. The panels use the same kilometre scale for major roads and urban centres.

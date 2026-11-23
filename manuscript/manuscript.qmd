@@ -1,6 +1,6 @@
 ---
 title: "Cocoa Farming and Access to Markets in Ghana"
-date: 2026-11-17
+date: 2026-11-23
 bibliography: ../references.bib
 abstract: |
   This study asks whether mapped cocoa in Ghana lies closer to major roads and urban centres than expected under a climate-and-elevation baseline. The analysis compares 57,131 cocoa-positive 1 km cells with 999 fixed-count simulated patterns under each of four baselines. Under the primary spatially cross-fitted model, the observed median distance was 1.30 km shorter for roads and 2.15 km shorter for urban centres than the simulated medians. Distance-binned and geographic intensity comparisons show where occupancy departs from that baseline. Uneven model performance across regions, uncertainty about source-raster coverage, and the use of straight-line distances limit the interpretation to provisional spatial association.
@@ -14,9 +14,15 @@ Agricultural geography offers a competing explanation for apparent proximity to 
 
 # Related research
 
+## Roads and cocoa marketing
+
 Ghana's system of cocoa marketing distinguishes physical access from the price received by producers. @kolavalli2017 describe a board-managed system that coordinates producer-price setting, quality control and export marketing. Even when a producer price is set centrally, farm-to-purchasing-point access can affect the time and transport needed to move beans. Urban centres may indicate broader access to population and services, but dedicated cocoa buying points may also be located in smaller communities. The nearest mapped town is therefore a secondary proxy for settlement proximity, and its relationship with farm-to-buyer travel is an empirical question.
 
 Evidence from Ghana links transportation infrastructure to agricultural markets and the geography of production. In a comparison of two rural study areas, @acheampong2018 found that farmers in areas with improved roads used more inputs and showed greater market participation than farmers in areas with unpaved roads. Such comparisons show why road condition matters in addition to distance. The historical study by @jedwab2016 examines how colonial rail connections changed the geography of cocoa production and economic activity in Ghana. That research considers historical infrastructure investments. Our cross-sectional comparison addresses the present-day spatial association between mapped cocoa and the available mapped roads, with limited ability to establish when each feature appeared.
+
+In February 2026, Ghana's Ministry of Finance reported plans to use agricultural road financing in cocoa-growing areas [@ghanafinance2026]. That announcement establishes current policy relevance. The OpenStreetMap extract describes mapped infrastructure at a single date and does not track which projects were funded or completed.
+
+## Mapping cocoa from satellite imagery
 
 @kalischek2023cocoa used satellite imagery and a high-resolution cocoa map to study cocoa expansion and forest loss in Ghana and Côte d'Ivoire. That map gives the present study a consistent spatial record of classified cocoa at a scale that can be compared with roads and settlements nationwide. Aggregation to a 1 km grid makes the environmental and accessibility layers comparable, although the unit represents presence somewhere in the cell and carries no direct information on the size of an individual farm, its production or its buyer.
 
@@ -26,9 +32,21 @@ Our directional hypothesis is that cocoa-positive cells have a shorter median di
 
 # Data and methods
 
+## Input layers and study window
+
 The ETH Zurich binary cocoa map [@kalischek2024cocoamap] was overlaid with WorldClim 2.1 annual mean temperature, annual precipitation and SRTM-derived elevation [@fick2017worldclim; @worldclim2021], plus roads and settlements from the Geofabrik Ghana OpenStreetMap snapshot [@geofabrik2026; @OSMcopyright]. The working boundary is the Geofabrik OSM national administrative polygon. It is provisional, not an independently validated official boundary.
 
+| Layer used | Observation period or version | Role |
+| --- | --- | --- |
+| ETH Zurich cocoa extent | 2019–2021 Sentinel-2 imagery, dataset released in 2024 | Mapped cocoa occupancy |
+| WorldClim 2.1 | 1970–2000 climate normals and SRTM-derived elevation | Environmental baseline |
+| Geofabrik Ghana | November 9, 2026 OpenStreetMap snapshot | Major roads, urban centres and working boundary |
+
+: Input layers used in the reported estimates. {#tbl-inputs}
+
 The analysis uses a 1 km grid in EPSG:2136 (Accra / Ghana National Grid; Gold Coast feet). The working national polygon, the cocoa raster coverage mask and complete environmental predictors define eligibility; cells beyond the cocoa raster extent are excluded. The source product uses a 0.65 threshold for cocoa classification. Its approximately 10 m values are aggregated to 1 km, and any positive aggregate marks that cell as occupied. WorldClim inputs are resampled from 2.5 arc-minutes by bilinear interpolation. The candidate grid contains 240,294 cells, including 57,131 mapped-positive cells (23.8%). The OSM boundary geometry measures 251,021.5 km². The cocoa raster bounding box intersects 99.94% of this polygon by area; approximately 143.3 km² lies outside the bounding box. The boundary area is a geometry-derived diagnostic, not an authoritative area statistic.
+
+## Environmental baseline and simulations
 
 For the primary environmental null, a binomial generalized additive model generated five-fold spatially cross-fitted scores from smooth terms for mean annual temperature, log-transformed annual precipitation and elevation. Each held-out fold was scored by a model trained on the other four. Whole spatial blocks were grouped into five folds; 20 km blocks are primary, with 40 km as a sensitivity. Road and town distances were excluded as predictors. Each of four nulls generated 999 fixed-count (57,131), no-replacement patterns: 20 km cross-fit, 40 km cross-fit, in-sample environmental GAM, and uniform sampling across eligible candidate cells. The analysis uses 6,229 OSM motorway, trunk, primary and secondary line features and 577 mapped city, town and national-capital points. The urban-centre points serve as a settlement proxy; these are not verified cocoa-buying markets.
 
@@ -45,6 +63,10 @@ We also estimate a conventional area-based quadrat intensity surface over a fixe
 ![Mapped cocoa, major roads and urban centres in Ghana. Green squares represent cocoa-positive 1 km cells, brown lines show major roads, and purple points show cities, towns and national capitals. Cocoa data are from ETH Zurich. Road, settlement and boundary data are from OpenStreetMap contributors via Geofabrik.](../outputs/figures/ghana_cocoa_access_map.png){#fig-access width=80%}
 
 @fig-access shows a broad concentration in southern and southwestern Ghana and a narrower belt in the east. Roads and urban centres are visible within and beyond these concentrations. The overlap motivates a comparison with patterns that give greater weight to suitable climate and elevation.
+
+![Terrain views of mean straight-line distance to the nearest major road (left) and mapped urban centre (right). Both panels use the same kilometre scale. Yellow includes distances of 100 km and above. Distances are averaged across eligible cells in each 8 km display bin. Elevation is vertically exaggerated.](../outputs/figures/ghana_accessibility_terrain.png){#fig-access-terrain}
+
+@fig-access-terrain shows the corridors of shorter distance around major roads and the wider pockets of remoteness between mapped towns and cities. These are two distance measures computed for every eligible cell. The tests below compare where observed and simulated cocoa patterns fall on those measures.
 
 ![Ghana in two oblique terrain views. Green shows observed cocoa occupancy (left). Teal and brown show where occupancy is above and below simulated mean occupancy under the primary environmental baseline (right). Colour and SRTM-derived elevation are averaged over the same eligible 1 km cells within each 8 km display bin. Elevation is vertically exaggerated.](../outputs/figures/ghana_cocoa_terrain.png){#fig-terrain}
 
@@ -73,9 +95,11 @@ The observed median distance is 11.96 km to a major road and 26.43 km to an urba
 
 In the first column of @fig-distance-intensity, observed positive-cell shares exceed the 20 km cross-fit simulation envelope in the 0–20 km bands and fall below it in the more distant bands. For the town/city proxy, observed shares are lower in the 0–5 km band, higher in the 5–50 km bands, and lower beyond 50 km, consistent with a shift from the most distant cells toward intermediate distances rather than a uniform increase at every distance. These pointwise band comparisons are exploratory and not a simultaneous test. The median-distance result is the pre-specified directional test. Its minimum p-value of 0.001 is the resolution of 999 draws, not evidence that the probability is zero. All results remain conditional on the cocoa map, eligible cells, boundary and environmental model.
 
-## Geographic intensity
+## Whole road-distance profile
 
 An exploratory whole-profile check compares all five road-distance bands at once. For each band, we centre and scale the occupied-cell shares across the observed pattern and all 999 draws together. We then take each pattern's largest absolute standardized departure across the five bands. Applying the same calculation to every pattern preserves comparability and accounts for dependence among bands through the joint simulated profiles. The observed score was 27.93, compared with a maximum of 3.28 among the 999 simulated profiles (Monte Carlo rank p = 0.001). This post hoc result checks the fit of the road-distance profile under the same fitted baseline as the median test. Both comparisons share the environmental model's geographic limitations.
+
+## Geographic intensity
 
 ![Observed mapped cocoa occupancy and mean cell inclusion under the 20 km and 40 km cross-fitted environmental nulls.](../outputs/figures/ghana_environmental_intensity_comparison.png){#fig-occupancy}
 
@@ -113,11 +137,13 @@ The similar distance results under 20 km and 40 km blocks establish sensitivity 
 
 Mapped cocoa cells were a median 1.30 km closer to major roads than predicted by the primary climate-and-elevation baseline. The direction persists across the three environmental baselines, and the national maps show that substantial local differences remain even where they reproduce the broad cocoa belt. The median distance and intensity comparisons support a provisional first-order association between mapped cocoa and road proximity.
 
-The next step is to verify source-raster NaN semantics and the working boundary, then use a vetted land-cover mask to define eligible land. After that, reassess calibration with alternative spatial folds and test whether the proximity gaps persist under those revised weights. Verified purchasing sites and historical road-network data would support a subsequent comparison using network travel times.
+1. Verify the original raster's coverage and the working boundary. Use the Ghanaian CERSGIS 2024–2025 reference polygons to check recent cocoa mapping agreement in sampled areas, accounting for the time gap [@cersgis2025].
+2. Test whether the road-distance finding survives replacing the original map with the Forest Data Partnership's 2026a cocoa product. Its 2020 and 2024 layers would allow a comparison across mapping products and years with an explicit threshold sensitivity check [@forestdata2026]. Reassess calibration with alternative spatial folds and a vetted land-cover mask.
+3. Obtain verified cocoa purchasing locations and historical road-network data to compare network travel times using dates closer to the cocoa observations.
 
 # Code and reproducibility
 
-The [repository instructions](https://github.com/LuisaStu/GIS_Cocoa#reproduce-the-analysis) document input versions, checksums and the dated road extract. After acquiring the inputs and restoring the R environment, run these commands from the repository root. The terrain script uses NumPy, Matplotlib and Rasterio.
+The [repository instructions](https://github.com/LuisaStu/GIS_Cocoa#reproduce-the-analysis) document input versions, checksums and the dated road extract. After acquiring the inputs and restoring the R environment, run these commands from the repository root. The terrain script uses NumPy and Matplotlib.
 
 ```sh
 Rscript R/12_ghana_wide_null_model.R
